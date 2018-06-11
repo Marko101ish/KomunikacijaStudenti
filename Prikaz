@@ -5,7 +5,9 @@ private void prikaz_Click(object sender, EventArgs e)
             /*textBox1.Text = mesec;
             textBox2.Text = godina;*/
             konekcija.Open();
-            string komandaa = "SELECT Student.Ime, Student.Prezime, Count(Kontakt_Informacije.StudentID) AS CountOfStudentID FROM Student INNER JOIN(Profesor INNER JOIN Kontakt_Informacije ON Profesor.ProfesorID = Kontakt_Informacije.ProfesorID) ON Student.StudentID = Kontakt_Informacije.StudentID WHERE Profesor.Email IS NOT NULL AND year(Kontakt_Informacije.DatumKontakta)= @godina AND month(Kontakt_Informacije.DatumKontakta)= @mesec GROUP BY Student.Ime, Student.Prezime";
+            string komandaa = "SELECT Kontakt_Informacije.ProfesorID, Profesor.Ime, Profesor.Prezime, Count(Kontakt_Informacije.ProfesorID) FROM Profesor INNER JOIN Kontakt_Informacije ON Profesor.ProfesorID=Kontakt_Informacije.ProfesorID " +
+"WHERE year(Kontakt_Informacije.DatumKontakta)=2015 AND month(Kontakt_Informacije.DatumKontakta)=1 AND Profesor.Email IS NOT NULL AND (Not(Profesor.Email) = '') " +
+"GROUP BY Kontakt_Informacije.ProfesorID, Profesor.Ime, Profesor.Prezime";
             komanda = new OleDbCommand(komandaa, konekcija);
             komanda.Parameters.AddWithValue("@godina", godina);
             komanda.Parameters.AddWithValue("@mesec", mesec);
@@ -17,18 +19,25 @@ private void prikaz_Click(object sender, EventArgs e)
             {
                 MessageBox.Show(ex.Message);
             }
-            while (true)
+            if (reader.HasRows)
             {
-                try
+                while (true)
                 {
-                    reader.Read();
-                    dataGridView1.Rows.Add(reader[0], reader[1], reader[2]);
-                }
-                catch (Exception ex)
-                {
+                    try
+                    {
+                        reader.Read();
+                        dataGridView1.Rows.Add(reader[1].ToString(), reader[2].ToString(), reader[3].ToString());
 
-                    break;
+
+                    }
+                    catch (Exception ex)
+                    {
+
+                        break;
+                    }
                 }
             }
+            else
+                MessageBox.Show("Nema poklapanja!", "Obavestenje!");
             konekcija.Close();
         }
